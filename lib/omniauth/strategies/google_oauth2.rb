@@ -40,7 +40,7 @@ module OmniAuth
       info do
         prune!({
           :name       => raw_info['name'],
-          :email      => verified_email,
+          :email      => raw_info['email'],
           :first_name => raw_info['given_name'],
           :last_name  => raw_info['family_name'],
           :image      => image_url,
@@ -59,11 +59,23 @@ module OmniAuth
       end
 
       def raw_info
-        @raw_info ||= access_token.get('https://www.googleapis.com/plus/v1/people/me/openIdConnect').parsed
+        begin
+          access_token.get('https://www.googleapis.com/plus/v1/people/me/openIdConnect').parsed
+        rescue ::OAuth2::Error => e
+          p "*" * 50
+          p "Oauth2 Error"
+          p e
+          p "*" * 50
+          email = JWT.decode(access_token['id_token'], nil, false)['email']
+          @raw_info = {
+              'email' => email
+          }
+        end
       end
 
       def raw_friend_info(id)
-        @raw_friend_info ||= access_token.get("https://www.googleapis.com/plus/v1/people/#{id}/people/visible").parsed
+        {}
+        #@raw_friend_info ||= access_token.get("https://www.googleapis.com/plus/v1/people/#{id}/people/visible").parsed
       end
 
       def custom_build_access_token
