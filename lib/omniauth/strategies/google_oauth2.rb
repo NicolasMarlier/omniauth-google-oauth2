@@ -62,14 +62,25 @@ module OmniAuth
         begin
           access_token.get('https://www.googleapis.com/plus/v1/people/me/openIdConnect').parsed
         rescue ::OAuth2::Error => e
-          p "*" * 50
-          p "Oauth2 Error"
-          p e
-          p "*" * 50
-          email = JWT.decode(access_token['id_token'], nil, false)['email']
-          @raw_info = {
-              'email' => email
-          }
+          begin
+            p "*" * 50
+            p access_token['id_token']
+            p "-" * 50
+            p JWT.decode(access_token['id_token'], nil, false)
+            p "*" * 50
+          rescue
+          end
+
+          begin
+            email = JWT.decode(access_token['id_token'], nil, false)['email']
+            @raw_info = {
+                'email' => email
+            }
+          rescue
+            @raw_info = {
+                'email' => 'unknown'
+            }
+          end
         end
       end
 
