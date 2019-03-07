@@ -60,26 +60,22 @@ module OmniAuth
 
       def raw_info
         begin
-          access_token.get('https://www.googleapis.com/plus/v1/people/me/openIdConnect').parsed
-        rescue ::OAuth2::Error => e
-          begin
-            data = JWT.decode(access_token['id_token'], nil, false)
-            if data.class == Hash
-              email = data['email']
-            elsif data.class == Array
-              email = data.first['email']
-            else
-              email = "unknown"
-            end
-
-            @raw_info = {
-                'email' => email
-            }
-          rescue
-            @raw_info = {
-                'email' => 'unknown'
-            }
+          data = JWT.decode(access_token['id_token'], nil, false)
+          if data.class == Hash
+            email = data['email']
+          elsif data.class == Array
+            email = data.first['email']
+          else
+            email = "unknown"
           end
+
+          @raw_info = {
+              'email' => email
+          }
+        rescue
+          @raw_info = {
+              'email' => 'unknown'
+          }
         end
       end
 
